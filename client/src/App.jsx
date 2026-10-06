@@ -12,11 +12,16 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const todosPerPage = 5;
+
   function showError(err) {
     console.error(err);
     setError(err.message);
   }
 
+  // Load todos
   useEffect(() => {
     async function loadTodos() {
       try {
@@ -33,16 +38,23 @@ function App() {
     loadTodos();
   }, []);
 
+  // Add todo
   async function handleAdd(title) {
     try {
       setError("");
+
       const newTodo = await createTodo(title);
+
       setTodos((prev) => [newTodo, ...prev]);
+
+      // Go to first page after adding
+      setCurrentPage(1);
     } catch (err) {
       showError(err);
     }
   }
 
+  // Update todo
   async function handleUpdate(id, data) {
     try {
       setError("");
@@ -59,24 +71,48 @@ function App() {
     }
   }
 
+  // Delete todo
   async function handleDelete(id) {
     try {
       setError("");
+
       await deleteTodo(id);
 
       setTodos((prev) =>
         prev.filter((todo) => todo._id !== id)
       );
+
+      // If current page becomes empty, go back one page
+      setCurrentPage((page) => {
+        const remainingTodos = todos.filter(
+          (todo) => todo._id !== id
+        );
+
+        const remainingFiltered = remainingTodos.filter(
+          FILTERS[filter].test
+        );
+
+        const newTotalPages = Math.ceil(
+          remainingFiltered.length / todosPerPage
+        );
+
+        return newTotalPages === 0
+          ? 1
+          : Math.min(page, newTotalPages);
+      });
     } catch (err) {
       showError(err);
     }
   }
 
+  // Clear completed todos
   async function handleClearDone() {
     try {
       setError("");
 
-      const doneTodos = todos.filter((todo) => todo.completed);
+      const doneTodos = todos.filter(
+        (todo) => todo.completed
+      );
 
       for (const todo of doneTodos) {
         await deleteTodo(todo._id);
@@ -85,23 +121,66 @@ function App() {
       setTodos((prev) =>
         prev.filter((todo) => !todo.completed)
       );
+
+      setCurrentPage(1);
     } catch (err) {
       showError(err);
     }
   }
 
-  const filteredTodos = todos.filter(FILTERS[filter].test);
+  // Change filter
+  function handleFilterChange(newFilter) {
+    setFilter(newFilter);
+    setCurrentPage(1);
+  }
+
+  // Filter todos
+  const filteredTodos = todos.filter(
+    FILTERS[filter].test
+  );
+
+  // Calculate total pages
+  const totalPages = Math.ceil(
+    filteredTodos.length / todosPerPage
+  );
+
+  // Calculate which todos to display
+  const startIndex =
+    (currentPage - 1) * todosPerPage;
+
+  const endIndex =
+    startIndex + todosPerPage;
+
+  const paginatedTodos = filteredTodos.slice(
+    startIndex,
+    endIndex
+  );
+
+  // Change page
+  function goToPage(page) {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  }
 
   const taskWord =
-    filteredTodos.length === 1 ? "task" : "tasks";
+    filteredTodos.length === 1
+      ? "task"
+      : "tasks";
 
+  // Render todo list
   function renderTodos() {
     if (loading) {
-      return <p className="empty">Loading...</p>;
+      return (
+        <p className="empty">
+          Loading...
+        </p>
+      );
     }
 
     if (filteredTodos.length === 0) {
-      let message = "You're all caught up. Add a task above.";
+      let message =
+        "You're all caught up. Add a task above.";
 
       if (filter === "done") {
         message = "Nothing completed yet";
@@ -116,45 +195,106 @@ function App() {
     }
 
     return (
-      <ul className="todo-list">
-        {filteredTodos.map((todo) => (
-          <TodoItem
-            key={todo._id}
-            todo={todo}
-            onUpdate={handleUpdate}
-            onDelete={handleDelete}
-          />
-        ))}
-      </ul>
+      <>
+        <ul className="todo-list">
+          {paginatedTodos.map((todo) => (
+            <TodoItem
+              key={todo._id}
+              todo={todo}
+              onUpdate={handleUpdate}
+              onDelete={handleDelete}
+            />
+          ))}
+        </ul>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="pagination">
+
+            <button
+              onClick={() =>
+                goToPage(currentPage - 1)
+              }
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+
+            {Array.from(
+              { length: totalPages },
+              (_, index) => index + 1
+            ).map((page) => (
+              <button
+                key={page}
+                onClick={() =>
+                  goToPage(page)
+                }
+                className={
+                  currentPage === page
+                    ? "active"
+                    : ""
+                }
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() =>
+                goToPage(currentPage + 1)
+              }
+              disabled={
+                currentPage === totalPages
+              }
+            >
+              Next
+            </button>
+
+          </div>
+        )}
+      </>
     );
   }
 
   return (
     <div className="layout">
+
       <Sidebar
         todos={todos}
         filter={filter}
-        onFilter={setFilter}
+        onFilter={handleFilterChange}
         onClearDone={handleClearDone}
       />
 
       <main className="panel content">
+
         <header className="content-header">
-          <h2>{FILTERS[filter].label}</h2>
+
+          <h2>
+            {FILTERS[filter].label}
+          </h2>
 
           <span className="content-count">
             {filteredTodos.length} {taskWord}
           </span>
+
         </header>
 
-        <TodoForm onAdd={handleAdd} />
+        <TodoForm
+          onAdd={handleAdd}
+        />
 
         {error && (
-          <div className="error" role="alert">
+          <div
+            className="error"
+            role="alert"
+          >
             <span>{error}</span>
 
             <button
-              onClick={() => setError("")}
+              onClick={() =>
+                setError("")
+              }
               aria-label="Dismiss"
             >
               ×
@@ -163,6 +303,7 @@ function App() {
         )}
 
         {renderTodos()}
+
       </main>
     </div>
   );

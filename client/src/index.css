@@ -1,3 +1,4 @@
+
 :root {
   --bg: linear-gradient(135deg, #eef2ff, #fdf2f8);
   --panel: #ffffff;
@@ -62,6 +63,7 @@ button {
 }
 
 /* Layout: sidebar + main content */
+
 .layout {
   display: grid;
   grid-template-columns: 300px 1fr;
@@ -79,6 +81,7 @@ button {
 }
 
 /* Sidebar */
+
 .sidebar {
   display: flex;
   flex-direction: column;
@@ -139,6 +142,7 @@ h1 {
 }
 
 /* Progress ring */
+
 .ring {
   position: relative;
   width: 64px;
@@ -177,6 +181,7 @@ h1 {
 }
 
 /* Filters */
+
 .filters {
   display: flex;
   flex-direction: column;
@@ -237,6 +242,7 @@ h1 {
 }
 
 /* Main content */
+
 .content {
   display: flex;
   flex-direction: column;
@@ -262,6 +268,7 @@ h2 {
 }
 
 /* Form */
+
 .todo-form {
   display: flex;
   gap: 10px;
@@ -275,13 +282,18 @@ h2 {
   border-radius: 12px;
   font-size: 15px;
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    background 0.15s;
 }
 
 .todo-form input:focus {
   background: transparent;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+  box-shadow:
+    0 0 0 3px
+    color-mix(in srgb, var(--primary) 20%, transparent);
 }
 
 .todo-form button {
@@ -303,6 +315,7 @@ h2 {
 }
 
 /* Error banner */
+
 .error {
   display: flex;
   justify-content: space-between;
@@ -322,6 +335,7 @@ h2 {
 }
 
 /* List */
+
 .todo-list {
   list-style: none;
   margin-top: 20px;
@@ -338,13 +352,16 @@ h2 {
   padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
   animation: fade-in 0.2s ease;
 }
 
 .todo-item:hover {
   background: var(--hover);
-  border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+  border-color:
+    color-mix(in srgb, var(--primary) 30%, var(--border));
 }
 
 @keyframes fade-in {
@@ -355,6 +372,7 @@ h2 {
 }
 
 /* Round custom checkbox */
+
 .todo-item input[type="checkbox"] {
   appearance: none;
   flex-shrink: 0;
@@ -365,7 +383,9 @@ h2 {
   cursor: pointer;
   display: grid;
   place-content: center;
-  transition: background 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
 
 .todo-item input[type="checkbox"]:hover {
@@ -448,6 +468,7 @@ h2 {
 }
 
 /* Empty state */
+
 .empty {
   flex: 1;
   display: flex;
@@ -468,13 +489,15 @@ h2 {
 }
 
 /* Always show actions on touch screens */
+
 @media (hover: none) {
   .actions {
     opacity: 1;
   }
 }
 
-/* Tablet and phone: stack the sidebar above the content */
+/* Tablet and phone */
+
 @media (max-width: 800px) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
@@ -505,6 +528,8 @@ h2 {
   }
 }
 
+/* Small phones */
+
 @media (max-width: 480px) {
   .filters button {
     padding: 8px 6px;
@@ -514,4 +539,60 @@ h2 {
   .content-header h2 {
     font-size: 22px;
   }
+
+  .pagination {
+    gap: 5px;
+  }
+
+  .pagination button {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+}
+
+/* Pagination */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 10px 0;
+}
+
+.pagination button {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.pagination button.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
