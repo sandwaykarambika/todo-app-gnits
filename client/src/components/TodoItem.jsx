@@ -1,19 +1,13 @@
-import { useState } from "react";
 
 function TodoItem({ todo, onUpdate, onDelete }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [text, setText] = useState(todo.title);
-
-  const handleSave = () => {
-    const title = text.trim();
-    if (title && title !== todo.title) onUpdate(todo._id, { title });
-    else setText(todo.title);
-    setIsEditing(false);
+  const handleToggle = () => {
+    onUpdate(todo._id, {
+      completed: !todo.completed,
+    });
   };
 
-  const handleCancel = () => {
-    setText(todo.title);
-    setIsEditing(false);
+  const handleDelete = () => {
+    onDelete(todo._id);
   };
 
   return (
@@ -21,45 +15,38 @@ function TodoItem({ todo, onUpdate, onDelete }) {
       <input
         type="checkbox"
         checked={todo.completed}
-        onChange={() => onUpdate(todo._id, { completed: !todo.completed })}
-        aria-label={`Mark "${todo.title}" as ${todo.completed ? "not done" : "done"}`}
+        onChange={handleToggle}
+        aria-label={
+          todo.completed
+            ? `Mark "${todo.title}" as not done`
+            : `Mark "${todo.title}" as done`
+        }
       />
 
-      {isEditing ? (
-        <input
-          className="edit-input"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onBlur={handleSave}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSave();
-            if (e.key === "Escape") handleCancel();
-          }}
-          autoFocus
-        />
-      ) : (
-        <div className="todo-text" onDoubleClick={() => setIsEditing(true)}>
-          <span className="title">{todo.title}</span>
-          <span className="meta">
-            Added{" "}
-            {new Date(todo.createdAt).toLocaleDateString(undefined, {
-              day: "numeric",
-              month: "short",
-            })}
-          </span>
-        </div>
-      )}
+      <div className="todo-text">
+        <span className="title">{todo.title}</span>
 
-      {!isEditing && (
-        <div className="actions">
-          <button onClick={() => setIsEditing(true)}>Edit</button>
-          <button className="delete" onClick={() => onDelete(todo._id)}>
-            Delete
-          </button>
-        </div>
-      )}
+        <span className="meta">
+          Added{" "}
+          {new Date(todo.createdAt).toLocaleDateString(undefined, {
+            day: "numeric",
+            month: "short",
+          })}
+        </span>
+      </div>
+
+      <div className="actions">
+        <button onClick={() => onUpdate(todo._id, { title: todo.title })}>
+          Edit
+        </button>
+
+        <button className="delete" onClick={handleDelete}>
+          Delete
+        </button>
+      </div>
     </li>
   );
 }
 
 export default TodoItem;
+
